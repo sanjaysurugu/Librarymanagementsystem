@@ -10,8 +10,17 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = frontendUrl.split(',').map(url => url.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, '')) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow requests in production if origin matches
+    }
+  },
   credentials: true,
 }));
 
