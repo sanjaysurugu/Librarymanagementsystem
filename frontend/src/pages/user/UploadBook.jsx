@@ -37,9 +37,6 @@ function UploadBook() {
       const res = await axios.get(`${API_URL}/categories`);
       if (res.data.success && res.data.categories) {
         setCategories(res.data.categories);
-        if (res.data.categories.length > 0) {
-          setFormData(prev => ({ ...prev, category: res.data.categories[0]._id }));
-        }
       }
     } catch (err) {
       console.error('Failed to load categories:', err);

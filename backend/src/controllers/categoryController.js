@@ -1,7 +1,26 @@
 const Category = require('../models/Category');
 
+const DEFAULT_CATEGORIES = [
+  { name: 'Fiction', description: 'Novels, short stories, and literary works.' },
+  { name: 'Non-Fiction', description: 'Informative and factual books.' },
+  { name: 'Science & Technology', description: 'Science, computing, and technology resources.' },
+  { name: 'History', description: 'Historical books and biographies.' },
+  { name: 'Education', description: 'Academic and learning materials.' },
+  { name: 'Children & Young Adult', description: 'Books for children and young readers.' },
+  { name: 'Self-Help', description: 'Personal growth and wellness books.' },
+  { name: 'Arts & Literature', description: 'Art, poetry, and literary criticism.' },
+];
+
+const ensureDefaultCategories = async () => {
+  const categoryCount = await Category.countDocuments();
+  if (categoryCount === 0) {
+    await Category.insertMany(DEFAULT_CATEGORIES);
+  }
+};
+
 const getCategories = async (req, res, next) => {
   try {
+    await ensureDefaultCategories();
     const cats = await Category.find({ isActive: true }).sort({ name: 1 });
     res.json({ success: true, categories: cats });
   } catch (err) { next(err); }
