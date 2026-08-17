@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 function UploadBook() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -40,6 +41,9 @@ function UploadBook() {
       }
     } catch (err) {
       console.error('Failed to load categories:', err);
+      setError('Unable to load categories. Please refresh the page and try again.');
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
@@ -91,7 +95,6 @@ function UploadBook() {
 
       const res = await axios.post(`${API_URL}/books`, data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: token ? `Bearer ${token}` : '',
         },
       });
@@ -103,7 +106,9 @@ function UploadBook() {
         }, 1500);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload book. Please try again.');
+      const validationErrors = err.response?.data?.errors;
+      const message = validationErrors?.map(({ msg }) => msg).join(', ') || err.response?.data?.message;
+      setError(message || 'Failed to upload book. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -221,6 +226,7 @@ function UploadBook() {
               value={formData.category}
               onChange={handleChange}
               required
+              disabled={categoriesLoading || categories.length === 0}
               style={{
                 width: '100%',
                 padding: '0.8rem 1rem',
@@ -231,7 +237,9 @@ function UploadBook() {
                 backgroundColor: '#fff'
               }}
             >
-              <option value="" disabled>Select Category</option>
+              <option value="" disabled>
+                {categoriesLoading ? 'Loading categories...' : categories.length ? 'Select Category' : 'No categories available'}
+              </option>
               {categories.map((cat) => (
                 <option key={cat._id} value={cat._id}>
                   {cat.name}

@@ -12,10 +12,16 @@ const DEFAULT_CATEGORIES = [
 ];
 
 const ensureDefaultCategories = async () => {
-  const categoryCount = await Category.countDocuments();
-  if (categoryCount === 0) {
-    await Category.insertMany(DEFAULT_CATEGORIES);
-  }
+  await Category.bulkWrite(
+    DEFAULT_CATEGORIES.map((category) => ({
+      updateOne: {
+        filter: { name: category.name },
+        update: { $setOnInsert: category },
+        upsert: true,
+      },
+    })),
+    { ordered: false }
+  );
 };
 
 const getCategories = async (req, res, next) => {
