@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { isApiConfigured } from '../../api/apiConfig';
 import './AuthPages.css';
 
 function RegisterPage() {
@@ -19,11 +20,25 @@ function RegisterPage() {
       setError('Passwords do not match');
       return;
     }
+    if (!isApiConfigured) {
+      setError('The registration service has not been configured for this deployment.');
+      return;
+    }
     try {
       await register(formData);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const apiError = err.response?.data;
+      const validationMessage = apiError?.errors?.map(({ msg }) => msg).join(', ');
+      setError(
+        validationMessage
+        || apiError?.message
+        || (err.response
+          ? 'The registration service returned an unexpected response. Please contact support.'
+          : err.request
+            ? 'Unable to reach the server. Please try again in a moment.'
+            : 'Registration failed. Please try again.')
+      );
     }
   };
 
