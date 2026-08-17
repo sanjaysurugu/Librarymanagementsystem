@@ -35,8 +35,8 @@ const bookSchema = new mongoose.Schema({
   isFeatured:     { type: Boolean, default: false },
 }, { timestamps: true });
 
-bookSchema.pre('save', async function (next) {
-  if (!this.isModified('title')) return next();
+bookSchema.pre('save', async function () {
+  if (!this.isModified('title')) return;
   let base  = slugify(this.title, { lower: true, strict: true });
   let slug  = base;
   let count = 1;
@@ -44,7 +44,6 @@ bookSchema.pre('save', async function (next) {
     slug = `${base}-${count++}`;
   }
   this.slug = slug;
-  next();
 });
 
 bookSchema.index({ title: 'text', author: 'text', description: 'text', tags: 'text' });
