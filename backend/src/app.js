@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
 const app = express();
@@ -33,12 +34,14 @@ app.use('/api/', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/firebase', require('./routes/firebaseRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

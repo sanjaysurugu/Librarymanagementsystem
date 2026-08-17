@@ -1,16 +1,30 @@
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const hasCloudinaryConfig = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
 
-// Use memoryStorage; upload to Cloudinary manually in controllers
+if (hasCloudinaryConfig) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
+
+const uploadDir = path.join(__dirname, '..', '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'coverImage') {
       if (!file.mimetype.startsWith('image/')) {
@@ -39,13 +53,35 @@ const upload = multer({
 
 const uploadFields = upload.fields([
   { name: 'coverImage', maxCount: 1 },
-  { name: 'bookFile',   maxCount: 1 },
+  { name: 'bookFile', maxCount: 1 },
 ]);
 
 const uploadAvatar = upload.single('avatar');
 
-const uploadToCloudinary = (buffer, options) =>
+const getLocalUploadUrl = (filename) => {
+  const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+  return `${baseUrl.replace(/\/$/, '')}/uploads/${filename}`;
+};
+
+const uploadToCloudinary = (buffer, options = {}) =>
   new Promise((resolve, reject) => {
+    if (!hasCloudinaryConfig) {
+      const extension = options.resource_type === 'raw' ? path.extname(options.public_id || 'upload.bin') || '.bin' : '.png';
+      const filename = `${Date.now()}-${Math.random().toString(16).slice(2)}${extension}`;
+      const filePath = path.join(uploadDir, filename);
+
+      fs.writeFile(filePath, buffer, (err) => {
+        if (err) return reject(err);
+        const url = getLocalUploadUrl(filename);
+        resolve({
+          secure_url: url,
+          url,
+          public_id: filename,
+        });
+      });
+      return;
+    }
+
     const stream = cloudinary.uploader.upload_stream(options, (err, result) => {
       if (err) reject(err);
       else resolve(result);
@@ -63,4 +99,4 @@ const getMimeFileType = (mimetype) => {
   return map[mimetype] || 'pdf';
 };
 
-module.exports = { cloudinary, uploadFields, uploadAvatar, uploadToCloudinary, getMimeFileType };
+module.exports = { cloudinary: { uploader: { destroy: async () => {} } }, uploadFields, uploadAvatar, uploadToCloudinary, getMimeFileType };
