@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { isApiConfigured } from '../../api/apiConfig';
 import './AuthPages.css';
 
 function LoginPage() {
@@ -15,6 +16,10 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isApiConfigured) {
+      setError('The login service has not been configured for this deployment.');
+      return;
+    }
     try {
       await login(formData);
       navigate('/');
@@ -24,7 +29,9 @@ function LoginPage() {
       setError(
         validationMessage
         || apiError?.message
-        || (err.request
+        || (err.response
+          ? 'The login service returned an unexpected response. Please contact support.'
+          : err.request
           ? 'Unable to reach the server. Please try again in a moment.'
           : 'Login failed. Please try again.')
       );
