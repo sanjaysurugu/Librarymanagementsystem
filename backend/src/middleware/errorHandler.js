@@ -8,6 +8,10 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'JsonWebTokenError'){ status = 401; message = 'Invalid token'; }
   if (err.name === 'TokenExpiredError'){ status = 401; message = 'Token expired'; }
   if (err.code === 'LIMIT_FILE_SIZE')  { status = 400; message = 'File too large'; }
+  if (err.message?.includes('buffering timed out')) {
+    status = 503;
+    message = 'Database service is temporarily unavailable. Please try again later.';
+  }
 
   res.status(status).json({
     success: false,
