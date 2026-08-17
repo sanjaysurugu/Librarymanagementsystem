@@ -19,7 +19,15 @@ function LoginPage() {
       await login(formData);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      const apiError = err.response?.data;
+      const validationMessage = apiError?.errors?.map(({ msg }) => msg).join(', ');
+      setError(
+        validationMessage
+        || apiError?.message
+        || (err.request
+          ? 'Unable to reach the server. Please try again in a moment.'
+          : 'Login failed. Please try again.')
+      );
     }
   };
 
