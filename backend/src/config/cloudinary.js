@@ -59,7 +59,7 @@ const uploadFields = upload.fields([
 const uploadAvatar = upload.single('avatar');
 
 const getLocalUploadUrl = (filename) => {
-  const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+  const baseUrl = process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 5000}`;
   return `${baseUrl.replace(/\/$/, '')}/uploads/${filename}`;
 };
 

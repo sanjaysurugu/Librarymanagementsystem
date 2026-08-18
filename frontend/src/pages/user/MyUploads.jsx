@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useBookStore } from '../../store/bookStore';
 
 function MyUploads() {
-  const { books, getBooks, loading } = useBookStore();
+  const { books, getMyUploads, loading } = useBookStore();
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    getBooks({ page });
+    getMyUploads({ page }).catch(() => {});
   }, [page]);
 
   return (
@@ -14,6 +14,9 @@ function MyUploads() {
       <h1>My Uploads</h1>
       {loading ? (
         <p>Loading...</p>
+      ) : (
+        books.length === 0 ? (
+        <p>You haven't uploaded any books yet.</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -33,7 +36,7 @@ function MyUploads() {
             ))}
           </tbody>
         </table>
-      )}
+      ))}
     </div>
   );
 }
