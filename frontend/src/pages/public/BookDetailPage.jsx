@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useBookStore } from '../../store/bookStore';
+import { API_URL } from '../../api/apiConfig';
 import './BookDetailPage.css';
 
 function BookDetailPage() {
@@ -86,7 +87,7 @@ function BookDetailPage() {
 
             <div className="book-actions">
               {book.bookFile?.url && (
-                <a href={book.bookFile.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-large">
+                <a href={`${API_URL}/books/${book._id}/download`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-large">
                   📥 Download Book
                 </a>
               )}

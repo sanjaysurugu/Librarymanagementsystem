@@ -32,6 +32,18 @@ export const useBookStore = create((set, get) => ({
     }
   },
 
+  getMyUploads: async (params) => {
+    try {
+      set({ loading: true, error: null });
+      const response = await bookAPI.getMyUploads(params);
+      set({ books: response.data.books, pagination: response.data.pagination, loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to fetch uploads', loading: false });
+      throw error;
+    }
+  },
+
   createBook: async (data) => {
     try {
       set({ loading: true, error: null });

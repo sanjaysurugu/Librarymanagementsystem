@@ -9,7 +9,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const app = express();
 
 // Middleware
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(morgan('combined'));
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 const allowedOrigins = frontendUrl.split(',').map(url => url.trim().replace(/\/$/, ''));

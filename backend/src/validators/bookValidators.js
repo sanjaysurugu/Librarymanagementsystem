@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const validateBookCreate = [
   body('title').trim().notEmpty().withMessage('Title is required').isLength({ min: 3, max: 200 }).withMessage('Title must be 3-200 characters'),
   body('author').trim().notEmpty().withMessage('Author is required'),
-  body('category').notEmpty().withMessage('Category is required').isMongoId().withMessage('Invalid category'),
+  body('category').trim().notEmpty().withMessage('Category is required'),
   body('description').trim().notEmpty().withMessage('Description is required').isLength({ min: 10 }).withMessage('Description must be at least 10 characters'),
   body('language').optional().trim(),
   body('pages').optional().isInt({ min: 0 }).withMessage('Pages must be a positive number'),

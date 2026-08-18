@@ -79,7 +79,7 @@ function BrowseBooksPage() {
                     </div>
                   )}
                   <div className="book-overlay">
-                    <a href={`/book/${book.slug}`} className="btn btn-primary">
+                    <a href={`/book/${book.slug || book._id}`} className="btn btn-primary">
                       View Details
                     </a>
                   </div>

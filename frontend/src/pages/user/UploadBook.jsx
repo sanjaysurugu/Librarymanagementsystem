@@ -101,7 +101,7 @@ function UploadBook() {
       if (res.data.success) {
         setSuccess(res.data.message || 'Book uploaded successfully!');
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/user/uploads');
         }, 1500);
       }
     } catch (err) {
